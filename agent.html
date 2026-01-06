@@ -1,106 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智能助手</title>
     <style>
       html, body {
         height: 100%;
         margin: 0;
+        /* 移动端常用背景色，避免白屏刺眼 */
+        background-color: #f5f5f5; 
       }
     </style>
   </head>
   <body>
-    <!-- Install SDK -->
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.20/libs/cn/index.js"></script>
     <script>
+      // 关键点2：简单的判断逻辑，如果屏幕宽度小于 768px，认为是手机
+      const isMobile = window.innerWidth < 768;
+
       new CozeWebSDK.WebChatClient({
-        /**
-        * Agent or app settings
-        * for agent
-        * @param config.bot_id - Agent ID.
-        * for app
-        * @param config.type - To integrate a Coze app, you must set the value to app.
-        * @param config.isIframe - Whether to use the iframe method to open the chat box
-        * @param config.appInfo.appId - AI app ID.
-        * @param config.appInfo.workflowId - Workflow or chatflow ID.
-        */
         config: {
           type: 'bot',
           bot_id: '7566232058348044324',
           isIframe: false,
         },
-        /**
-        * The auth property is used to configure the authentication method.
-        * @param type - Authentication method, default type is 'unauth', which means no authentication is required; it is recommended to set it to 'token', which means authentication is done through PAT (Personal Access Token) or OAuth.
-        * @param token - When the type is set to 'token', you need to configure the PAT (Personal Access Token) or OAuth access key.
-        * @param onRefreshToken - When the access key expires, a new key can be set as needed.
-        */
         auth: {
           type: 'token',
+          // 安全提示：生产环境中请勿将 Token 直接暴露在前端代码中
           token: 'pat_yOr4bTC9i2dLrWrVdQ8tnebgx4bbMxLZL0wGUDIegnGZPUigWuB11Jet0qjQFiwC',
           onRefreshToken: async () => 'token'
         },
-        /**
-        * The userInfo parameter is used to set the display of agent user information in the chat box.
-        * @param userInfo.id - ID of the agent user.
-        * @param userInfo.url - URL address of the user's avatar.
-        * @param userInfo.nickname - Nickname of the agent user.
-        */
         userInfo: {
           id: 'user',
           url: 'https://lf-coze-web-cdn.coze.cn/obj/eden-cn/lm-lgvj/ljhwZthlaukjlkulzlp/coze/coze-logo.png',
-          nickname: 'User',
+          // 关键点3：汉化用户昵称
+          nickname: '访客', 
         },
         ui: {
-          /**
-          * The ui.base parameter is used to add the overall UI effect of the chat window.
-          * @param base.icon - Application icon URL.
-          * @param base.layout - Layout style of the agent chat box window, which can be set as 'pc' or'mobile'.
-          * @param base.lang - System language of the agent, which can be set as 'en' or 'zh-CN'.
-          * @param base.zIndex - The z-index of the chat box.
-          */
           base: {
             icon: 'https://lf-coze-web-cdn.coze.cn/obj/eden-cn/lm-lgvj/ljhwZthlaukjlkulzlp/coze/chatsdk-logo.png',
-            layout: 'pc',
-            lang: 'zh-CH',
+            // 关键点4：根据设备自动切换布局
+            // 'mobile' 模式会全屏显示，适合手机；'pc' 模式是右下角弹窗
+            layout: isMobile ? 'mobile' : 'pc', 
+            // 关键点5：修正语言代码错误 (原代码 zh-CH 是错误的)
+            lang: 'zh-CN',
             zIndex: 1000
           },
-          /**
-          * Controls whether to display the top title bar and the close button
-          * @param header.isShow - Whether to display the top title bar.
-          * @param header.isNeedClose - Whether to display the close button.
-          */
           header: {
             isShow: true,
-            isNeedClose: true,
+            isNeedClose: true, // 手机全屏模式下，关闭按钮通常用来“最小化”或退出
           },
-          /**
-          * Controls whether to display the floating ball at the bottom right corner of the page.
-          */
           asstBtn: {
             isNeed: true
           },
-          /**
-          * The ui.footer parameter is used to add the footer of the chat window.
-          * @param footer.isShow - Whether to display the bottom copy module.
-          * @param footer.expressionText - The text information displayed at the bottom.
-          * @param footer.linkvars - The link copy and link address in the footer.
-          */
           footer: {
             isShow: true,
-            expressionText: 'Powered by ...',
+            // 关键点6：汉化页脚文字
+            expressionText: '由 Coze AI 提供技术支持', 
           },
-          /**
-          * Control the UI and basic capabilities of the chat box.
-          * @param chatBot.title - The title of the chatbox
-          * @param chatBot.uploadable - Whether file uploading is supported.
-          * @param chatBot.width - The width of the agent window on PC is measured in px, default is 460.
-          * @param chatBot.el - Container for setting the placement of the chat box (Element).
-          */
           chatBot: {
-            title: 'Coze Bot',
+            // 关键点7：汉化聊天窗口标题
+            title: '智能助手', 
             uploadable: true,
-            width: 390,
+            // PC端保持原宽度，移动端通常SDK会自动自适应，但为了保险可以根据设备设置
+            width: isMobile ? '100%' : 390, 
           },
         },
       });
